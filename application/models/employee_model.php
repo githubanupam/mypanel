@@ -44,5 +44,91 @@ class Employee_model extends CI_Model {
         $query = $this->db->get();
         return $query->result_array();
     }
+    
+    public function getDivName($id = NULL) {
+        $this->db->select("id,unit_fullname,unit_shortname");
+
+        if ($id == NULL) {
+            $query = $this->db->get('tms_kpunit');
+            $row = $query->result_array();
+            return $row;
+        } else {
+            $this->db->where("id", $id);
+            $query = $this->db->get('tms_kpunit');
+            $row = $query->row_array();
+            return $row['unit_fullname'];
+        }
+    }
+    
+    public function getPsName($id = NULL) {
+        $this->db->select("id,sec_fullname,sec_shortunit");
+        if ($id == NULL) {
+            $query = $this->db->get('tms_kpsec');
+            $row = $query->result_array();
+            return $row;
+        } else {
+            $this->db->where("id", $id);
+            $query = $this->db->get('tms_kpsec');
+            $row = $query->row_array();
+            return $row['sec_fullname'];
+        }
+    }
+    
+    public function designationName($id = NULL) {
+
+        $this->db->select("usertype_id,s_name,f_name,type_order");
+        if ($id == NULL) {
+            $this->db->order_by("type_order", 'ASC');
+            $query = $this->db->get("usertype");
+            $result = $query->result_array();
+        } else {
+            $this->db->where("usertype_id", $id);
+            $query = $this->db->get("usertype");
+            $result = $query->row_array();
+        }
+        return $result;
+    }
+    
+    public function rankName($id = NULL) {
+        
+        $this->db->select("id,shortname,fullname,rankorder,status");
+        if($id==NULL)
+        {
+            $this->db->order_by("rankorder", 'DESC');
+            $query=$this->db->get("tms_kprank");
+            return $query->result_array();
+        }
+        else
+        {
+            $this->db->where('id',$id);
+            $query=$this->db->get("tms_kprank");
+            return $query->row_array();
+        }
+        return $result;
+    }
+    
+    public function employeeNameWithRank($id = NULL) {
+        
+        $this->db->select("emp.id,CONCAT(emp.emp_name,'(',emp.role_title,')') AS emp_name");
+        if($id==NULL)
+        {
+            $this->db->from("tms_employee emp");
+            $this->db->join("tms_usertype utype","emp.usertype_id=utype.usertype_id","left");
+            //$this->db->join("tms_employee_rank rank","emp.id=rank.employee_id","left");
+            //$this->db->join("tms_kprank rankorder","rank.rank_id=rankorder.id","left");
+            //$this->db->order_by("rankorder.rankorder", 'DESC');
+            $this->db->order_by("utype.type_order", 'ASC');
+
+            $query=$this->db->get();
+            return $query->result_array();
+        }
+        else
+        {
+            $this->db->where('emp.id',$id);
+            $query=$this->db->get("tms_employee emp");
+            return $query->row_array();
+        }
+        return $result;
+    }
 
 }

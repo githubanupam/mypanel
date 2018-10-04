@@ -1,10 +1,4 @@
 <style type="text/css">
-    /*    .action_btn{
-            padding: inherit !important;
-        }
-        .action_btn .fa{
-            margin-right: 0 !important;
-        }*/
     .test::after{
         content: '' !important;
     }
