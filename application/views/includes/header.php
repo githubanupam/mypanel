@@ -9,6 +9,7 @@
         <link rel="stylesheet" type="text/css" href="<?= base_url() ?>assets/css/font-awesome.min.css">
         <script src="<?= base_url() ?>assets/js/jquery-3.2.1.min.js"></script>
         <script src="<?= base_url() ?>assets/js/select2.min.js"></script>
+        <script src="<?= base_url() ?>assets/js/plugins/pace.min.js"></script>
     </head>
     <body class="app sidebar-mini rtl">
         <!-- Navbar-->

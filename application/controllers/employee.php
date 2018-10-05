@@ -47,14 +47,45 @@ class Employee extends MY_Controller {
         } else {
 
             $data['all_division'] = $this->employee_model->getDivName();
-            $data['all_section'] = $this->employee_model->getPsName();
+            $data['all_section'] = $this->employee_model->getPsName(NULL,NULL);
             $data['all_designation'] = $this->employee_model->designationName();
             $data['get_rank_details'] = $this->employee_model->rankName();
-            $data['get_emp_details'] = $this->employee_model->employeeNameWithRank();
+            $data['get_emp_details'] = $this->employee_model->employeeNameWithRank(NULL,NULL,NULL,NULL);
 
             $this->global['pageTitle'] = 'Sanjog : Add Employee';
             $this->loadViews("employee/employee_add_view", $this->global, $data, NULL);
         }
+    }
+
+    public function getPoliceStation($id=NULL,$divId=NULL) {
+        
+        if ($id == 'null') {
+            $id = NULL;
+        }
+        if ($divId == 'null') {
+            $divId = NULL;
+        }
+        $data = $this->employee_model->getPsName($id, $divId);
+        echo json_encode($data);
+        //die();
+    }
+
+    public function getReportingOfficers($id = NULL, $psId = NULL, $divId = NULL, $usertypeId = NULL) {
+
+        if ($id == 'null') {
+            $id = NULL;
+        }
+        if ($psId == 'null') {
+            $psId = NULL;
+        }
+        if ($divId == 'null') {
+            $divId = NULL;
+        }
+        if ($usertypeId == 'null') {
+            $usertypeId = NULL;
+        }
+        $data = $this->employee_model->employeeNameWithRank($id, $psId, $divId, $usertypeId);
+        echo json_encode($data);
     }
 
 }

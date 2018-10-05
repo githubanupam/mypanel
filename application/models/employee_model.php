@@ -44,36 +44,41 @@ class Employee_model extends CI_Model {
         $query = $this->db->get();
         return $query->result_array();
     }
-    
+
     public function getDivName($id = NULL) {
         $this->db->select("id,unit_fullname,unit_shortname");
 
         if ($id == NULL) {
             $query = $this->db->get('tms_kpunit');
             $row = $query->result_array();
-            return $row;
         } else {
             $this->db->where("id", $id);
             $query = $this->db->get('tms_kpunit');
             $row = $query->row_array();
-            return $row['unit_fullname'];
         }
+        return $row;
     }
-    
-    public function getPsName($id = NULL) {
+
+    public function getPsName($id = NULL, $divId = NULL) {
         $this->db->select("id,sec_fullname,sec_shortunit");
-        if ($id == NULL) {
+        if ($id == NULL && $divId == NULL) {
             $query = $this->db->get('tms_kpsec');
             $row = $query->result_array();
-            return $row;
-        } else {
+        } elseif ($id == NULL && $divId != NULL) {
+            $this->db->where("unit_id", $divId);
+            $query = $this->db->get('tms_kpsec');
+            //echo $this->db->last_query();
+            $row = $query->result_array();
+        } elseif ($id != NULL && $divId == NULL) {
             $this->db->where("id", $id);
             $query = $this->db->get('tms_kpsec');
-            $row = $query->row_array();
-            return $row['sec_fullname'];
+            $row = $query->result_array();
         }
+//        print_r($row);
+//        die();
+        return $row;
     }
-    
+
     public function designationName($id = NULL) {
 
         $this->db->select("usertype_id,s_name,f_name,type_order");
@@ -88,47 +93,48 @@ class Employee_model extends CI_Model {
         }
         return $result;
     }
-    
+
     public function rankName($id = NULL) {
-        
+
         $this->db->select("id,shortname,fullname,rankorder,status");
-        if($id==NULL)
-        {
+        if ($id == NULL) {
             $this->db->order_by("rankorder", 'DESC');
-            $query=$this->db->get("tms_kprank");
+            $query = $this->db->get("tms_kprank");
             return $query->result_array();
-        }
-        else
-        {
-            $this->db->where('id',$id);
-            $query=$this->db->get("tms_kprank");
+        } else {
+            $this->db->where('id', $id);
+            $query = $this->db->get("tms_kprank");
             return $query->row_array();
         }
         return $result;
     }
-    
-    public function employeeNameWithRank($id = NULL) {
-        
+
+    public function employeeNameWithRank($id = NULL, $psId = NULL, $divId = NULL, $usertypeId = NULL) {
+
         $this->db->select("emp.id,CONCAT(emp.emp_name,'(',emp.role_title,')') AS emp_name");
-        if($id==NULL)
-        {
-            $this->db->from("tms_employee emp");
-            $this->db->join("tms_usertype utype","emp.usertype_id=utype.usertype_id","left");
-            //$this->db->join("tms_employee_rank rank","emp.id=rank.employee_id","left");
-            //$this->db->join("tms_kprank rankorder","rank.rank_id=rankorder.id","left");
-            //$this->db->order_by("rankorder.rankorder", 'DESC');
-            $this->db->order_by("utype.type_order", 'ASC');
 
-            $query=$this->db->get();
-            return $query->result_array();
+        $this->db->from("tms_employee emp");
+        $this->db->join("tms_usertype utype", "emp.usertype_id=utype.usertype_id", "left");
+        //$this->db->join("tms_employee_rank rank","emp.id=rank.employee_id","left");
+        //$this->db->join("tms_kprank rankorder","rank.rank_id=rankorder.id","left");
+        //$this->db->order_by("rankorder.rankorder", 'DESC');
+        if ($id != NULL) {
+            $this->db->where('emp.id', $id);
         }
-        else
-        {
-            $this->db->where('emp.id',$id);
-            $query=$this->db->get("tms_employee emp");
-            return $query->row_array();
+        if ($psId != NULL) {
+            $this->db->where('emp.access_stations', $psId);
         }
-        return $result;
+        if ($divId != NULL) {
+            $this->db->where('emp.emp_district', $divId);
+        }
+        if ($usertypeId != NULL) {
+            $this->db->where('emp.usertype_id>=', $usertypeId);
+        }
+        $this->db->order_by("utype.type_order", 'ASC');
+
+        $query = $this->db->get();
+        
+        //echo $this->db->last_query();
+        return $query->result_array();
     }
-
 }

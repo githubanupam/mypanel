@@ -140,15 +140,7 @@
                                 <label class="control-label">Reporting officer</label>
                                 <div>
                                     <select class="form-control" id="parent_id" name="parent_id">
-                                        <option></option>
-                                        <?php
-                                        if (count($get_emp_details))
-                                            foreach ($get_emp_details as $row_emp) {
-                                                ?>
-                                                <option value="<?= $row_emp['id'] ?>" <?php echo set_select('parent_id', $row_emp['id']); ?>><?= $row_emp['emp_name'] ?></option>
-                                                <?php
-                                            }
-                                        ?>  
+                                        <option></option> 
                                     </select>
                                     <?= form_error('parent_id') ?>
                                 </div>
@@ -278,28 +270,10 @@
             placeholder: "Select a rank"
         });
 
-        $(".filter").on('change', function () {
-
-            var divId = $('#emp_district').val();
-            var psId = $('#access_stations').val();
-            var usertypeId = $('#usertype_id').val();
-
-            if (divId == '')
-            {
-                divId = 'null';
-            }
-            if (psId == '')
-            {
-                psId = 'null';
-            }
-            if (usertypeId == '')
-            {
-                usertypeId = 'null';
-            }
-
+        function getPoliceStation(id, divId) {
             jQuery.ajax({
                 type: "POST",
-                url: "<?php echo base_url(); ?>" + "staff/getPoliceStation/" + divId,
+                url: "<?php echo base_url(); ?>" + "employee/getPoliceStation/" + id + "/" + divId,
                 dataType: 'json',
                 success: function (res) {
                     if (res)
@@ -308,13 +282,85 @@
                         $.each(res, function () {
                             $("#access_stations").append('<option value="' + this.id + '">' + this.sec_shortunit + '</option>')
                         });
+
+                        //callback();
                     } else
                     {
                         alert('Unable to fetch Officers');
                     }
                 }
             });
-            alert(psId);
+        }
+
+        function getReportingOfficers(id = null, psId = null, divId = null, usertypeId = null) {
+            jQuery.ajax({
+                type: "POST",
+                url: "<?php echo base_url(); ?>" + "employee/getReportingOfficers/" + id + "/" + psId + "/" + divId + "/" + usertypeId,
+                dataType: 'json',
+                success: function (res) {
+                    if (res)
+                    {
+                        $("#parent_id").find('option').remove();
+                        $.each(res, function () {
+                            $("#parent_id").append('<option value="' + this.id + '">' + this.emp_name + '</option>')
+                        });
+                    } else
+                    {
+                        alert('Unable to fetch Officers');
+                    }
+                }
+            });
+        }
+
+//        $(".filter").on('change', function () {
+//            var usertypeId = $('#usertype_id').val();
+//            var psId = $('#access_stations').val();
+//            var divId = $('#emp_district').val();
+//
+//            if (divId != '') {
+//                getPoliceStation(null, divId, function () {
+//                    alert(psId);
+//                    if (psId != '') {
+//                        getReportingOfficers(null, psId, divId, null);
+//                    } else {
+//                        getReportingOfficers(null, null, divId, null);
+//                    }
+//                });
+//            }
+//        });
+        
+        $("#emp_district").on('change', function () {
+            var divId = $('#emp_district').val();
+            getPoliceStation(null, divId);
+            getReportingOfficers(null, null, divId, null);
         });
+        
+        $("#access_stations").on('change', function () {
+            var divId = $('#emp_district').val();
+            var psId = $('#access_stations').val();
+            getReportingOfficers(null, psId, divId, null);
+        });
+        
+//        $(".filter").on('change', function () {
+//            var usertypeId = $('#usertype_id').val();
+//            var psId = $('#access_stations').val();
+//            var divId = $('#emp_district').val();
+//            
+//            if (divId != ''){
+//                getPoliceStation(null, divId);
+//            }
+//            
+//            getReportingOfficers(null, psId, divId, null);
+////            if (divId != '') {
+////                getPoliceStation(null, divId, function () {
+////                    alert(psId);
+////                    if (psId != '') {
+////                        getReportingOfficers(null, psId, divId, null);
+////                    } else {
+////                        getReportingOfficers(null, null, divId, null);
+////                    }
+////                });
+////            }
+//        });
     });
 </script>
