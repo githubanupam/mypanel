@@ -71,7 +71,7 @@ class Employee extends MY_Controller {
     }
 
     public function getReportingOfficers($id = NULL, $psId = NULL, $divId = NULL, $usertypeId = NULL) {
-
+        
         if ($id == 'null') {
             $id = NULL;
         }

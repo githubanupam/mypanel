@@ -110,9 +110,18 @@ class Employee_model extends CI_Model {
     }
 
     public function employeeNameWithRank($id = NULL, $psId = NULL, $divId = NULL, $usertypeId = NULL) {
-
+        
+        $this->db->select("type_order");
+        $this->db->from("tms_usertype");
+        $this->db->where('usertype_id', $usertypeId);
+        $query = $this->db->get();
+        //echo $this->db->last_query();
+        $usertype_order = $query->row_array();
+        
+        //echo $usertype_order['type_order'];
+        //die('okkk');
+        
         $this->db->select("emp.id,CONCAT(emp.emp_name,'(',emp.role_title,')') AS emp_name");
-
         $this->db->from("tms_employee emp");
         $this->db->join("tms_usertype utype", "emp.usertype_id=utype.usertype_id", "left");
         //$this->db->join("tms_employee_rank rank","emp.id=rank.employee_id","left");
@@ -128,13 +137,14 @@ class Employee_model extends CI_Model {
             $this->db->where('emp.emp_district', $divId);
         }
         if ($usertypeId != NULL) {
-            $this->db->where('emp.usertype_id>=', $usertypeId);
+            $this->db->where('utype.type_order <', $usertype_order['type_order']);
         }
         $this->db->order_by("utype.type_order", 'ASC');
 
         $query = $this->db->get();
-        
+
         //echo $this->db->last_query();
         return $query->result_array();
     }
+
 }

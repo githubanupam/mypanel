@@ -293,6 +293,8 @@
         }
 
         function getReportingOfficers(id = null, psId = null, divId = null, usertypeId = null) {
+
+            //alert("divId===>" + divId + "usertypeId===>" + usertypeId);
             jQuery.ajax({
                 type: "POST",
                 url: "<?php echo base_url(); ?>" + "employee/getReportingOfficers/" + id + "/" + psId + "/" + divId + "/" + usertypeId,
@@ -328,19 +330,36 @@
 //                });
 //            }
 //        });
-        
+
         $("#emp_district").on('change', function () {
             var divId = $('#emp_district').val();
             getPoliceStation(null, divId);
-            getReportingOfficers(null, null, divId, null);
+            //getReportingOfficers(null, null, divId, null);
         });
-        
+
         $("#access_stations").on('change', function () {
             var divId = $('#emp_district').val();
             var psId = $('#access_stations').val();
-            getReportingOfficers(null, psId, divId, null);
+            //getReportingOfficers(null, psId, divId, null);
         });
-        
+
+        $("#usertype_id").on('change', function () {
+            var divId = $('#emp_district').val();
+            var psId = $('#access_stations').val();
+            var usertypeId = $('#usertype_id').val();
+            //alert("divId=>" + divId + "usertypeId=>" + usertypeId);
+
+            if (divId != '' && psId != '' && usertypeId != '') {
+                if (usertypeId == 6) {
+                    getReportingOfficers(null, null, null, usertypeId);
+                } else if (usertypeId == 7 || usertypeId == 9) {
+                    getReportingOfficers(null, null, divId, usertypeId);
+                } else {
+                    getReportingOfficers(null, psId, divId, usertypeId);
+                }
+            }
+        });
+
 //        $(".filter").on('change', function () {
 //            var usertypeId = $('#usertype_id').val();
 //            var psId = $('#access_stations').val();
