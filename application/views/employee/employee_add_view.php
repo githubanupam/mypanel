@@ -34,7 +34,7 @@
                     <?php
                     $attributes = array('class' => 'form-horizontal', 'id' => 'addStaff');
                     ?>
-                    <?= form_open('staff/add_staff_process', $attributes); ?>
+                    <?= form_open('employee/add_employee_process', $attributes); ?>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -313,24 +313,7 @@
                 }
             });
         }
-
-//        $(".filter").on('change', function () {
-//            var usertypeId = $('#usertype_id').val();
-//            var psId = $('#access_stations').val();
-//            var divId = $('#emp_district').val();
-//
-//            if (divId != '') {
-//                getPoliceStation(null, divId, function () {
-//                    alert(psId);
-//                    if (psId != '') {
-//                        getReportingOfficers(null, psId, divId, null);
-//                    } else {
-//                        getReportingOfficers(null, null, divId, null);
-//                    }
-//                });
-//            }
-//        });
-
+        
         $("#emp_district").on('change', function () {
             var divId = $('#emp_district').val();
             getPoliceStation(null, divId);
@@ -360,26 +343,17 @@
             }
         });
 
-//        $(".filter").on('change', function () {
-//            var usertypeId = $('#usertype_id').val();
-//            var psId = $('#access_stations').val();
-//            var divId = $('#emp_district').val();
-//            
-//            if (divId != ''){
-//                getPoliceStation(null, divId);
-//            }
-//            
-//            getReportingOfficers(null, psId, divId, null);
-////            if (divId != '') {
-////                getPoliceStation(null, divId, function () {
-////                    alert(psId);
-////                    if (psId != '') {
-////                        getReportingOfficers(null, psId, divId, null);
-////                    } else {
-////                        getReportingOfficers(null, null, divId, null);
-////                    }
-////                });
-////            }
-//        });
+        var divId = $('#emp_district').val();
+        var psId = $('#access_stations').val();
+        var usertypeId = $('#usertype_id').val();
+        if (divId != '' && psId != '' && usertypeId != '') {
+            if (usertypeId == 6) {
+                getReportingOfficers(null, null, null, usertypeId);
+            } else if (usertypeId == 7 || usertypeId == 9) {
+                getReportingOfficers(null, null, divId, usertypeId);
+            } else {
+                getReportingOfficers(null, psId, divId, usertypeId);
+            }
+        }
     });
 </script>

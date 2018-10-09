@@ -53,14 +53,19 @@ class Login extends CI_Controller
             
             $result = $this->login_model->loginMe($username, $password);
             if(!empty($result))
-            {
-
+            {   
+                $loginStatusData = array(   'admin_id'=>$result->admin_id,
+                                            'login_ip'=>$this->input->ip_address(),
+                                            'login_time'=>date("Y-m-d h:i:s"));
+                $loginStatusId = $this->login_model->setLoginStatus($loginStatusData);
+                
                 $sessionArray = array(	'admin_id'=>$result->admin_id,                    
                                         'role'=>$result->roleId,
                                         'access_station'=>$result->access_station,
                                         'roleText'=>$result->role,
                                         'name'=>$result->nickname,
-                                        'isLoggedIn' => TRUE
+                                        'isLoggedIn' => TRUE,
+                                        'loginStatusId' =>$loginStatusId
                                 );
 
                 $this->session->set_userdata($sessionArray);

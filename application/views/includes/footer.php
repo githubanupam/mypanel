@@ -11,7 +11,7 @@
 <script type="text/javascript" src="<?= base_url() ?>assets/js/plugins/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="<?= base_url() ?>assets/js/dataTables.rowGroup.min.js"></script>
 <script type="text/javascript" src="<?= base_url() ?>assets/js/plugins/dataTables.bootstrap.min.js"></script>
-<script src="https://cdn.datatables.net/plug-ins/1.10.19/pagination/input.js" type="text/javascript"></script>
+<script type="text/javascript" src="<?= base_url() ?>assets/js/plugins/input.js"></script>
 
 
 <!--<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -51,6 +51,10 @@
         var activeTab = localStorage.getItem('activeTab');
         $('a[href="' + activeTab + '"]').toggleClass('active');
         $('a[href="' + activeTab + '"]').parent().parent().parent().toggleClass('is-expanded');
+
+        setTimeout(function () {
+            $('.alert').fadeOut('slow');
+        }, 3000);
 
 
     });

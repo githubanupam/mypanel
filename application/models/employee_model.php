@@ -110,17 +110,17 @@ class Employee_model extends CI_Model {
     }
 
     public function employeeNameWithRank($id = NULL, $psId = NULL, $divId = NULL, $usertypeId = NULL) {
-        
+
         $this->db->select("type_order");
         $this->db->from("tms_usertype");
         $this->db->where('usertype_id', $usertypeId);
         $query = $this->db->get();
         //echo $this->db->last_query();
         $usertype_order = $query->row_array();
-        
+
         //echo $usertype_order['type_order'];
         //die('okkk');
-        
+
         $this->db->select("emp.id,CONCAT(emp.emp_name,'(',emp.role_title,')') AS emp_name");
         $this->db->from("tms_employee emp");
         $this->db->join("tms_usertype utype", "emp.usertype_id=utype.usertype_id", "left");
@@ -147,4 +147,123 @@ class Employee_model extends CI_Model {
         return $query->result_array();
     }
 
+    public function check_contactno_exist($str) {
+
+        $this->db->select("emp_contactno");
+        $this->db->from($this->table);
+        $this->db->where("emp_contactno", $str);
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function add_employee($employee) {
+
+        $this->db->trans_start();
+        $this->db->insert($this->table, $employee);
+        //echo $this->db->last_query();       
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+
+        return $insert_id;
+    }
+
+    public function add_employee_access_station($station) {
+
+        $this->db->trans_start();
+        $this->db->insert('tms_employee_access_stations', $station);
+        //echo $this->db->last_query();       
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+
+        return $insert_id;
+    }
+
+    public function add_employee_performance($employee, $last_inserted_id) {
+
+        $data = array('employee_id' => $last_inserted_id,
+            'employee_phone' => $employee['emp_contactno']
+        );
+        $this->db->trans_start();
+        $this->db->insert('tms_employee_performance', $data);
+        //echo $this->db->last_query();       
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+
+        return $insert_id;
+    }
+
+    public function add_employee_rank($employee, $last_inserted_id) {
+
+        $data = array('employee_id' => $last_inserted_id,
+            'rank_id' => $employee['current_rank_id'],
+            'rank_title' => $employee['role_title']
+        );
+        $this->db->trans_start();
+        $this->db->insert('tms_employee_rank', $data);
+        //echo $this->db->last_query();       
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+
+        return $insert_id;
+    }
+
+    public function add_employee_skills($employee, $last_inserted_id) {
+
+        $data = array('emp_id' => $last_inserted_id
+        );
+        $this->db->trans_start();
+        $this->db->insert('tms_employee_skills', $data);
+        //echo $this->db->last_query();       
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+
+        return $insert_id;
+    }
+    
+    public function getViewEmployee($id) {
+
+        $this->db->select(" id,
+                            parent_id,
+                            emp_id,
+                            emp_guardian_name,
+                            emp_contactno,
+                            emp_emailid,
+                            emp_name,
+                            emp_pic,
+                            emp_district,
+                            usertype_id,
+                            supervisor,
+                            allocation_task_settings,
+                            status,
+                            is_super,
+                            access_stations,
+                            current_rank_id,
+                            role_title,
+                            fd_authorise,
+                            leave_so,
+                            leave_oc,
+                            leave_ac,
+                            leave_dc,
+                            is_leave_applicable  
+                            ");
+        $this->db->where("id", $id);
+        $query = $this->db->get($this->table);
+        $row = $query->row_array();
+        return $row;
+    }
+
+    public function getEmployeeScore($id) {
+
+        $this->db->select("*");
+        $this->db->where("employee_id", $id);
+        $query = $this->db->get('tms_employee_performance');
+        $row = $query->row_array();
+        return $row;
+    }
+    
+    function getConnectionCount() {
+        $query = $this->db->query("SELECT count(*) as COUNT FROM `tms_employee` WHERE last_seen >= CONCAT(CURDATE(), ' 00:00:00') && last_seen < CONCAT(CURDATE(), ' 23:59:59')");
+        $row = $query->row();
+        return $row->COUNT;
+    }
 }
