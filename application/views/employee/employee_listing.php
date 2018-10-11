@@ -94,19 +94,19 @@
                 '</tr>' +
                 '<tr>' +
                 '<td width="25%">View Employee Details:</td>' +
-                '<td width="25%">' + ((d.view_employee==undefined)? '-':d.view_employee) + '</td>' +
+                '<td width="25%">' + ((d.view_employee == undefined) ? '-' : d.view_employee) + '</td>' +
                 '<td width="25%">Edit Employee Details:</td>' +
-                '<td width="25%">' + ((d.edit_employee==undefined)? '-':d.edit_employee) + '</td>' +
+                '<td width="25%">' + ((d.edit_employee == undefined) ? '-' : d.edit_employee) + '</td>' +
                 '</tr>' +
                 '<tr>' +
                 '<td width="25%">Delete Employee Details:</td>' +
-                '<td width="25%">' + ((d.delete_employee==undefined)? '-':d.delete_employee) + '</td>' +
+                '<td width="25%">' + ((d.delete_employee == undefined) ? '-' : d.delete_employee) + '</td>' +
                 '<td width="25%">Password Re-generate:</td>' +
-                '<td width="25%">' + ((d.regen_pass==undefined)? '-':d.regen_pass) + '</td>' +
+                '<td width="25%">' + ((d.regen_pass == undefined) ? '-' : d.regen_pass) + '</td>' +
                 '</tr>' +
                 '<tr>' +
                 '<td width="25%">Reset IMEI:</td>' +
-                '<td width="25%">' + ((d.reset_imei==undefined)? '-':d.reset_imei) + '</td>' +
+                '<td width="25%">' + ((d.reset_imei == undefined) ? '-' : d.reset_imei) + '</td>' +
                 '<td width="25%"></td>' +
                 '<td width="25%"></td>' +
                 '</tr>' +
@@ -162,7 +162,15 @@
                             }
                         }
                     ],
-                    pagingType: 'input'
+                    pagingType: 'input',
+                    bStateSave: true,
+                    "fnStateSave": function (oSettings, oData) {
+                        localStorage.setItem('DataTables_' + window.location.pathname, JSON.stringify(oData));
+                    },
+                    "fnStateLoad": function (oSettings) {
+                        console.log(localStorage.getItem('DataTables_' + window.location.pathname));
+                        return JSON.parse(localStorage.getItem('DataTables_' + window.location.pathname));
+                    }
                 });
 
                 $('#user_data tbody').on('click', 'td.details-control', function () {
