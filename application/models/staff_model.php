@@ -39,7 +39,7 @@ class Staff_model extends CI_Model {
         null
     );
 
-    function make_query() {
+    function make_query($access_station = NULL, $roleId = NULL) {
         $this->db->select($this->select_column);
 
         $this->db->from("$this->table AS emp");
@@ -49,6 +49,14 @@ class Staff_model extends CI_Model {
         $this->db->join('tms_kpunit unit', 'emp.emp_district = unit.id', 'left');
         $this->db->join('tms_employee parent', 'emp.parent_id = parent.id', 'left');
         $this->db->join('tms_usertype parent_type', 'parent.usertype_id = parent_type.usertype_id', 'left');
+        if (isset($access_station) && !empty($access_station)) {
+
+            if ($roleId == 2)
+                $this->db->where('emp.emp_district', $access_station);
+            if ($roleId == 3)
+                $this->db->where('emp.access_stations', $access_station);
+        }
+        $this->db->where('emp.status !=', 'D');
         $this->db->where('emp.is_delete', 'N');
 
         if (isset($_POST['columns'][0]["search"]["value"]) && !empty($_POST['columns'][0]["search"]["value"])) {
@@ -110,8 +118,8 @@ class Staff_model extends CI_Model {
         }
     }
 
-    function make_datatables() {
-        $this->make_query();
+    function make_datatables($access_station, $roleId) {
+        $this->make_query($access_station, $roleId);
         if ($_POST["length"] != -1) {
             $this->db->limit($_POST['length'], $_POST['start']);
         }
@@ -120,15 +128,22 @@ class Staff_model extends CI_Model {
         return $query->result();
     }
 
-    function get_filtered_data() {
-        $this->make_query();
+    function get_filtered_data($access_station, $roleId) {
+        $this->make_query($access_station, $roleId);
         $query = $this->db->get();
         return $query->num_rows();
     }
 
-    function get_all_data() {
-        $this->db->select("*");
-        $this->db->from($this->table);
+    function get_all_data($access_station, $roleId) {
+        $this->db->select("id");
+        $this->db->from("$this->table AS emp");
+        if (isset($access_station) && !empty($access_station)) {
+
+            if ($roleId == 2)
+                $this->db->where('emp.emp_district', $access_station);
+            if ($roleId == 3)
+                $this->db->where('emp.access_stations', $access_station);
+        }
         return $this->db->count_all_results();
     }
 
@@ -377,14 +392,14 @@ class Staff_model extends CI_Model {
         $this->db->delete('tms_employee_access_stations');
         $this->db->trans_complete();
 
-        
+
         $result = array();
-        
+
         $this->db->trans_start();
         foreach ($station as $row_station) {
             $data['employee_id'] = $id;
             $data['station_id'] = $row_station;
-            $this->db->insert('tms_employee_access_stations', $data); 
+            $this->db->insert('tms_employee_access_stations', $data);
             $result[] = $this->db->insert_id();
         }
         $this->db->trans_complete();
@@ -394,9 +409,9 @@ class Staff_model extends CI_Model {
     public function edit_staff_performance($employee, $id) {
 
         $this->db->trans_start();
-        $this->db->set('employee_phone',$employee['emp_contactno']);
-        $this->db->where('employee_id',$id);
-        $this->db->update('tms_employee_performance');      
+        $this->db->set('employee_phone', $employee['emp_contactno']);
+        $this->db->where('employee_id', $id);
+        $this->db->update('tms_employee_performance');
         $this->db->trans_complete();
         return $this->db->affected_rows();
     }
@@ -404,15 +419,14 @@ class Staff_model extends CI_Model {
     public function edit_staff_rank($employee, $id) {
 
         $this->db->trans_start();
-        $this->db->set('rank_id',$employee['current_rank_id']);
-        $this->db->set('rank_title',$employee['role_title']);
-        $this->db->where('employee_id',$id);
+        $this->db->set('rank_id', $employee['current_rank_id']);
+        $this->db->set('rank_title', $employee['role_title']);
+        $this->db->where('employee_id', $id);
         $this->db->update('tms_employee_rank');
         $this->db->trans_complete();
 
         return $this->db->affected_rows();
     }
-    
 
     public function change_status($postData, $id) {
         $response = array();

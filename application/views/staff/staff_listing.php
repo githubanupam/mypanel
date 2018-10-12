@@ -117,7 +117,7 @@
         //alert(value);
         jQuery.ajax({
             type: "POST",
-            url: "<?php echo base_url(); ?>" + "staff/getPoliceStation/" + divId,
+            url: "<?php echo base_url(); ?>" + "staff/getPoliceStation/" + null + "/" + divId,
             dataType: 'json',
             success: function (res) {
                 if (res)
@@ -179,7 +179,7 @@
 
                     <div class="table-responsive">  
 
-                        <table id="user_data" class="table table-bordered table-striped table-sm" width="100%" style="font-size:12px">
+                        <table id="user_data" class="table table-bordered table-striped table-sm" width="100%">
                             <thead>  
                                 <tr>  
                                     <th width="7%">Sl No.</th>  
@@ -193,6 +193,9 @@
                                     <th width="10%">Status</th>
                                 </tr> 
                             </thead>
+                            <?php
+                                if($role!=3){
+                            ?>
                             <thead class="search-header">  
                                 <tr>  
                                     <th width="7%"></th>  
@@ -225,15 +228,23 @@
                                     </th>
                                     <th width="12%">
                                         <select data-column="5"  class="form-control form-control-sm search" id="unit_shortname">
+                                        <?php
+                                            if($role==2){
+                                        ?>
+                                            <option value="<?=$access_station?>" selected="selected"><?=divName($access_station)?></option>
+                                        <?php
+                                            }else{
+                                        ?>
                                             <option value=""></option>
-                                            <?php
-                                            $units = divName();
-                                            foreach ($units as $row_unit) {
-                                                ?>
-                                                <option value="<?= $row_unit['id'] ?>"><?= $row_unit['unit_shortname'] ?></option>
-                                                <?php
+                                        <?php
+                                                $units = divName();
+                                                foreach ($units as $row_unit) {
+                                        ?>
+                                                    <option value="<?= $row_unit['id'] ?>"><?= $row_unit['unit_shortname'] ?></option>
+                                        <?php   
+                                                }
                                             }
-                                            ?>
+                                        ?>
                                         </select>
                                     </th>
                                     <th width="13%">
@@ -249,6 +260,9 @@
                                     </th>
                                 </tr> 
                             </thead>
+                            <?php
+                                }
+                            ?>
                         </table>  
                     </div>
                 </div>
@@ -261,7 +275,7 @@
         //localStorage.clear();
         function format(d) {
 
-            return '<table width="100%" border="1" style="font-size-adjust:0.35;">' +
+            return '<table width="100%" border="1" style="font-size:12px;">' +
                     '<tr>' +
                     '<td colspan="4" width="25%" style="text-align:center;" bgcolor="#f7ac6f">ACTIONS</td>' +
                     '</tr>' +

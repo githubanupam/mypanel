@@ -3,7 +3,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Staff extends MY_Controller {
-
+    
+    protected $roleId;
+    protected $access_station;
+    protected $pageName=array();
+    protected $pageId;
+    protected $actionAccess=array();
+    
     public function __construct() {
         parent::__construct();
         $this->load->model('staff_model');
@@ -11,28 +17,35 @@ class Staff extends MY_Controller {
         $this->isLoggedIn();
     }
 
-    function index() {
-        //die('ok');
+    public function index() {
+//die('ok');
         $this->global['pageTitle'] = 'Sanjog : Employee Listing';
         $this->loadViews("staff/staff_listing", $this->global, NULL, NULL);
     }
 
     function fetch_user() {
 
-
         $roleId = $this->global['role'];
         $access_station = $this->global['access_station'];
         $pageName = $this->router->fetch_class();
         $pageId = $this->userrole_model->getPageId($pageName)['pageId'];
         $actionAccess = $this->userrole_model->getActionAccessByPageAndRole($roleId, $pageId);
-
-        $fetch_data = $this->staff_model->make_datatables();
+        
+//        echo "<pre>";
+//        print_r($access_station);
+//        echo "</pre>";
+//        
+//        echo "<pre>";
+//        print_r($actionAccess);
+//        echo "</pre>";
+//        die();
+        $fetch_data = $this->staff_model->make_datatables($access_station, $roleId);
         $data = array();
 
         foreach ($fetch_data as $row) {
             $sub_array = array();
 
-            //$sub_array[] = ++$_POST['start'];
+//$sub_array[] = ++$_POST['start'];
             $sub_array[] = '';
             $sub_array[] = $row->emp_name;
             $sub_array[] = $row->emp_id;
@@ -65,7 +78,16 @@ class Staff extends MY_Controller {
                                 </div>';
 
             foreach ($actionAccess as $row_access) {
-                $sub_array[$row_access['actionName']] = '<a href="' . base_url() . 'staff/' . $row_access['actionName'] . '/' . $row->id . '"><i class="fa ' . $row_access['actionIcon'] . ' btn btn-primary btn-xs"></i></a>';
+
+                if ($row_access['actionName'] == 'delete_staff') {
+                    $sub_array[$row_access['actionName']] = '<a href="' . base_url() . 'staff/' . $row_access['actionName'] . '/' . $row->id . '"><i class="fa ' . $row_access['actionIcon'] . ' btn btn-primary btn-xs" onclick="return checkDelete()"></i></a>';
+                } elseif ($row_access['actionName'] == 'regen_pass') {
+                    $sub_array[$row_access['actionName']] = '<i class="fa ' . $row_access['actionIcon'] . ' btn btn-primary btn-xs" onclick="regeneratePassword(' . $row->id . ')"></i>';
+                } elseif ($row_access['actionName'] == 'reset_imei') {
+                    $sub_array[$row_access['actionName']] = '<i class="fa ' . $row_access['actionIcon'] . ' btn btn-primary btn-xs" onclick="resetIMEI(' . $row->id . ')"></i>';
+                } else {
+                    $sub_array[$row_access['actionName']] = '<a href="' . base_url() . 'staff/' . $row_access['actionName'] . '/' . $row->id . '"><i class="fa ' . $row_access['actionIcon'] . ' btn btn-primary btn-xs"></i></a>';
+                }
             }
             $data[] = $sub_array;
 
@@ -74,8 +96,8 @@ class Staff extends MY_Controller {
         }
         $output = array(
             "draw" => intval($_POST["draw"]),
-            "recordsTotal" => $this->staff_model->get_all_data(),
-            "recordsFiltered" => $this->staff_model->get_filtered_data(),
+            "recordsTotal" => $this->staff_model->get_all_data($access_station, $roleId),
+            "recordsFiltered" => $this->staff_model->get_filtered_data($access_station, $roleId),
             "data" => $data
         );
         echo json_encode($output);
@@ -148,7 +170,7 @@ class Staff extends MY_Controller {
         $this->form_validation->set_rules('emp_name', 'Employee name', 'required');
         $this->form_validation->set_rules('emp_guardian_name', 'Guardian name', 'required');
         $this->form_validation->set_rules('emp_contactno', 'Employee contact no', 'callback_check_contactno_exist');
-        //$this->form_validation->set_rules('emp_emailid', 'Employee email id', 'required');
+//$this->form_validation->set_rules('emp_emailid', 'Employee email id', 'required');
         $this->form_validation->set_rules('emp_district', 'Employee division/unit', 'required');
         $this->form_validation->set_rules('access_stations[]', 'Employee police station', 'required');
         $this->form_validation->set_rules('usertype_id', 'Employee designation', 'required');
@@ -245,7 +267,7 @@ class Staff extends MY_Controller {
         $this->form_validation->set_rules('emp_name', 'Employee name', 'required');
         $this->form_validation->set_rules('emp_guardian_name', 'Guardian name', 'required');
         $this->form_validation->set_rules('emp_contactno', 'Employee contact no', 'required');
-        //$this->form_validation->set_rules('emp_emailid', 'Employee email id', 'required');
+//$this->form_validation->set_rules('emp_emailid', 'Employee email id', 'required');
         $this->form_validation->set_rules('emp_district', 'Employee division/unit', 'required');
         $this->form_validation->set_rules('access_stations[]', 'Employee police station', 'required');
         $this->form_validation->set_rules('usertype_id', 'Employee designation', 'required');
@@ -300,14 +322,14 @@ class Staff extends MY_Controller {
                 $this->staff_model->reset_leave($id, $leave);
             }
 
-            // echo "<pre>";
-            // print_r($employee);
-            // echo "</pre>";
-            // die();
+// echo "<pre>";
+// print_r($employee);
+// echo "</pre>";
+// die();
 
             $last_inserted_id = $this->staff_model->edit_staff($id, $employee);
-            
-            
+
+
             $result = $this->staff_model->edit_staff_access_station($id, $data['access_stations']);
 
             $performance = $this->staff_model->edit_staff_performance($employee, $id);
@@ -333,13 +355,17 @@ class Staff extends MY_Controller {
 
     public function delete_staff($id) {
 
-        $data = $this->staff_model->delete_staff($id);
-        if (isset($data)) {
-            $this->session->set_flashdata('success', 'Well done! Employee Successfully Deleted');
-            redirect('staff');
+        if ($this->isAdmin() == FALSE) {
+            $this->loadThis();
         } else {
-            $this->session->set_flashdata('error', 'Oh snap! Unable to Delete employee');
-            redirect('staff');
+            $data = $this->staff_model->delete_staff($id);
+            if (isset($data)) {
+                $this->session->set_flashdata('success', 'Well done! Employee Successfully Deleted');
+                redirect('staff');
+            } else {
+                $this->session->set_flashdata('error', 'Oh snap! Unable to Delete employee');
+                redirect('staff');
+            }
         }
     }
 
